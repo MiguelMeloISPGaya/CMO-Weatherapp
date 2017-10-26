@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Weatherapp</string>
+    <string name="queryHint">Insira o nome de uma cidade</string>
+    <string-array name="weather_params">
+        <item>Mostrar todos</item>
+        <item>Céu Limpo</item>
+        <item>Céu Nublado</item>
+        <item>Aguaçeiros</item>
+        <item>Chuviscos</item>
+        <item>Trevoada</item>
+        <item>Neve</item>
+    </string-array>
+</resources>
