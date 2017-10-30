@@ -2,6 +2,7 @@ package pt.ispg3814.com.weatherapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,8 +28,9 @@ import adapter.SearchPlacesAdapter;
 import models.GooglePlacesResult;
 import cz.msebera.android.httpclient.Header;
 import utils.GooglePlacesApiClient;
+import utils.NetworkstatusReceiver;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NetworkstatusReceiver.NetworkstatusReceiverListener {
 
     SearchView mSearchview;
     SearchPlacesAdapter mSearchViewAdapter;
@@ -44,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MainActivity.setmContext(this);
+
+        MainActivity.getmContext().registerReceiver(new NetworkstatusReceiver(), new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        checkConnection();
 
         mSearchview = (SearchView) findViewById(R.id.searchview_forecast);
         mSearchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -143,5 +148,31 @@ public class MainActivity extends AppCompatActivity {
 
     public static void setmContext(Context mContext) {
         MainActivity.mContext = mContext;
+    }
+
+    @Override
+    public void onNetworkConnectionChanged(boolean connected) {
+        if(!connected){
+            Intent intent = new Intent(MainActivity.getmContext(), NoConnectionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            MainActivity.getmContext().startActivity(intent);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // when we resume the app, we need to register the listener again
+        Weatherapp.getInstance().setConnectionListener(this);
+    }
+
+    private void checkConnection() {
+        boolean connected = NetworkstatusReceiver.connected();
+        if(!connected){
+            Intent intent = new Intent(MainActivity.getmContext(), NoConnectionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            MainActivity.getmContext().startActivity(intent);
+        }
     }
 }
