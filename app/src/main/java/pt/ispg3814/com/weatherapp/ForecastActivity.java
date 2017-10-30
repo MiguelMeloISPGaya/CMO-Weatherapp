@@ -36,7 +36,7 @@ public class ForecastActivity extends AppCompatActivity {
         setContentView(R.layout.activity_forecast);
 
         String query_params = getIntent().getStringExtra("City")+" "+getIntent().getStringExtra("Country");
-        String filter = getIntent().getStringExtra("Filter");
+        final String filter = getIntent().getStringExtra("Filter");
         filters = Utilities.getWeatherFromFilter(filter);
 
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.forecasts_recycler_view);
@@ -52,18 +52,23 @@ public class ForecastActivity extends AppCompatActivity {
             public void onResponse(Call<ForecastResponse> call, Response<ForecastResponse> response) {
                 TextView city_label = (TextView) findViewById(R.id.city_label_text);
                 CityResult city = response.body().getCityResult();
-                city_label.setText(city.getName()+" "+city.getCountry_code());
+                city_label.setText("Resultados para "+city.getName()+" "+city.getCountry_code()+ " com o filtro " + filter);
                 List<ForecastResult> results = response.body().getForecastresult();
                 List<ForecastResult> filteredResults = new ArrayList<ForecastResult>();
+
                 for (ForecastResult currentResult : results) {
-                    if(filters.size() == 0) {
+                    if (filters.size() == 0) {
                         filteredResults.add(currentResult);
-                    }
-                    else if (filters.contains(currentResult.getWeatherResultList().get(0).getId())) {
+                    } else if (filters.contains(currentResult.getWeatherResultList().get(0).getId())) {
                         filteredResults.add(currentResult);
                     }
                 }
+
                 recyclerView.setAdapter(new ForecastAdapter(filteredResults, R.layout.list_forecast_item, getApplicationContext()));
+
+                if (filteredResults.size() == 0) {
+                    city_label.setText("Sem Resultados para "+city.getName()+" "+city.getCountry_code()+ " com o filtro " + filter);
+                }
                 Log.d(TAG, "Number of results received: ");
             }
 
